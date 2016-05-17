@@ -1,82 +1,169 @@
 #include <iostream>
 #include <vector>
-#include <string>
-#include <cstdlib>
+
 using namespace std;
 
-void solution(const string &in,const int &key,const int &count)
+const int MAX_LEN = 42;
+struct bigInt
 {
-    int de_key = in.size()/key;
-    int loca = 0;
-    cout << "Case #" << count+1 << ":" << endl;
-    if (key == 1)
+    int digital[MAX_LEN];
+    bigInt()
     {
-        cout << in << endl;
-        return;
+        for (int i=0;i<MAX_LEN;++i)
+            digital[i] = 0;
     }
-
-    if (in.size()%key == 0){
-        // 整除
-        for (int i=0;i<de_key;++i)
-            for (int j=0;j<key;++j)
-                cout << in[i+j*de_key];
-    }
-    else{
-        for (int i=0;i<de_key+1;++i){
-            loca = i;
-            if (i <de_key){
-                for (int j=0;j<key;++j){
-                    if (j <= 0)
-                        loca += 0;
-                    else if (j < in.size()-key*de_key)
-                        loca += de_key+1;
-                    else
-                        loca += de_key;
-                    cout << in[loca];
-                }
-            }
-            else{
-                for (int j=0;j<in.size()-key*de_key;++j){
-                    if (j <= 0)
-                        loca += 0;
-                    else if (j < in.size()-key*de_key)
-                        loca += de_key+1;
-                    else
-                        loca += de_key;
-                    cout << in[loca];
-                }
-            }
+    bigInt(int value)
+    {
+        int index = 0;
+        for (int i=0;i<MAX_LEN;++i)
+            digital[i] = 0;
+        while(value > 0){
+            digital[index] = value%10;
+            value /= 10;
+            ++ index;
         }
     }
-    cout << endl;
+    bigInt(const bigInt&);
+    void assign(int value)
+    {
+        int index = 0;
+        while(value > 0){
+            digital[index] = value%10;
+            value /= 10;
+            ++ index;
+        }
+    }
+    void printbig()
+    {
+        int i=MAX_LEN-1;
+        for (;i>=0;--i)
+            if (digital[i] != 0)
+                break;
+        for (int j=i;j>=0;--j)
+            cout << digital[j];
+        cout << endl;
+    }
+    //注意每个重载操作符的形参及返回类型
+    bigInt& operator += (const bigInt &b); //复制操作符，复合复制操作符一般定义为成员函数
+    // bigInt& operator [] (int n);
+    bigInt& operator = (const bigInt &b);
+    friend istream& operator >> (istream&,bigInt&); // 输入输出操作符定义友元函数
+    friend ostream& operator << (ostream&,const bigInt&);
+};
+
+bigInt operator + (const bigInt &a,const bigInt &b){ //算术运算符及关系操作符定义非成员函数
+    //operator + 一般利用 operator += 实现
+    bigInt tmp = 0; 
+    tmp += a;
+    tmp += b;
+    return tmp;
 }
 
-int main()
+istream& operator >> (istream &in,bigInt &a){
+    for (int i=0;i<MAX_LEN;++i)
+        in >> a.digital[i];
+    return in;
+}
+
+ostream& operator << (ostream &out,const bigInt &a){
+    int i=MAX_LEN-1;
+    for (;i>=0;--i)
+        if (a.digital[i] != 0)
+            break;
+    for (int j=i;j>=0;--j)
+        out << a.digital[j];
+    return out;
+}
+
+bigInt::bigInt(const bigInt &a)
 {
-    //get input
-    int testNum = 0;
-    cin >> testNum;
-    string blank;
-    getline(cin,blank);
+    for (int i=0;i<MAX_LEN;++i)
+        digital[i] = a.digital[i];
+}
 
-    vector<string> in_str;
-    vector<int> key_list;
-    string tmp_str;
-    int tmp_key;
+bigInt& bigInt::operator = (const bigInt &b)
+{
+    for (int i=0;i<MAX_LEN;++i)
+        digital[i] = b.digital[i];
+    return *this;
+}
 
-    for (int i=0;i<testNum;++i)
+// bigInt& bigInt::operator [](int n){
+//     return *(this + (n*sizeof(bigInt)));
+// }
+
+bigInt& bigInt::operator += (const bigInt &b) {
+    int carry = 0;
+    int tmp = 0;
+    for (int i = 0; i < MAX_LEN; ++i)
     {
-        getline(cin,tmp_str);
-        in_str.push_back(tmp_str);
+        tmp = this->digital[i] + b.digital[i] + carry;
+        carry = tmp/10;
+        this->digital[i] = tmp%10;
+    }
+    // (*this) = (*this) + b;
+    return (*this);
+}
 
-        cin >> tmp_key;
-        key_list.push_back(tmp_key);
-        getline(cin,blank);
+// bigInt bigInt::operator + (bigInt b){
+//     bigInt addition;
+//     int carry = 0;
+//     int tmp = 0;
+
+//     for (int i=0;i<MAX_LEN;++i){
+//         tmp = digital[i] + b.digital[i] + carry;
+//         carry = tmp/10;
+//         addition.digital[i] = tmp%10;
+//     }
+//     return addition;
+// }
+
+bigInt solution(const int &number,const vector< vector<bigInt> > &C)
+{
+    int num_of_two = 0;
+    int num_of_one = 0;
+    bigInt total;
+
+    num_of_two = number / 2;
+    for (int i=0;i<=num_of_two;++i){
+        num_of_one = number - i*2; // 1的个数，i是二的个数
+        if (num_of_one < i)
+            total += C[num_of_one+i][num_of_one];
+        else
+            total += C[num_of_one+i][i];
     }
-    //manipulation process
-    for (int i=0;i<testNum;++i){
-        solution(in_str[i],key_list[i],i);
+    return total;
+}
+
+void cal(const int &n,const int &r,vector< vector<bigInt> > &C)
+{
+    for (int i=0; i<=n; i++)
+    {
+        for (int k=0; k<=r && k<=i; k++)
+            if (k==0 || k==i)
+                C[i][k] = 1;
+            else
+                C[i][k] = (C[i-1][k-1] + C[i-1][k]);
     }
+}
+
+int main() {
+    int n=200,r=100;
+
+    int tmp = 0,num = 0;
+    vector<int> in;
+
+    vector< vector<bigInt> > array(n+1,vector<bigInt> (r+1,0));
+    cal(n,r,array);
+    while(cin >> tmp)
+    {
+        in.push_back(tmp);
+        ++num;
+    }
+    for (int i=0;i<num;++i)
+       // solution(in[i],array).printbig();
+        cout << solution(in[i],array) << endl;
+    cin >> tmp;
     return 0;
 }
 
