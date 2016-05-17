@@ -1,11 +1,11 @@
 # baidu_star_contest 
 ## date : 2016/5/16
 #####|—— —— —— —— ——baidu_star_contest
-&ensp&ensp|
-&ensp&ensp|
-&ensp&ensp|
-&ensp&ensp|
-&ensp&ensp|
+ &ensp&ensp|
+ &ensp&ensp|
+ &ensp&ensp|
+ &ensp&ensp|
+ &ensp&ensp|
 
 ##### English version
 ##### p1002 : An implementation of simple BigInteger with c++
